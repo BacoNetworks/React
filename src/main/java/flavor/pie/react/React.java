@@ -36,6 +36,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -134,9 +135,8 @@ public class React {
         }
         inGame = true;
         current = config.words.get(random.nextInt(config.words.size()));
-        Text fullText = config.text.toBuilder().onHover(TextActions.showText(Text.of(current.trim()))).build();
-        Text toShow = config.prefix.concat(fullText).concat(config.suffix);
-        game.getServer().getBroadcastChannel().send(toShow);
+        Text fullText = TextSerializers.FORMATTING_CODE.deserialize(config.text.replace("%phrase%", current));
+        game.getServer().getBroadcastChannel().send(fullText);
         started = Instant.now();
         scheduleGame();
     }

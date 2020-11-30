@@ -16,9 +16,7 @@ import java.util.List;
 public class Config {
     public final static TypeToken<Config> type = TypeToken.of(Config.class);
 
-    @Setting public Text text = Text.of(TextColors.YELLOW, "Hover over this text to see a word. The first person to type it wins!");
-    @Setting public Text prefix = Text.EMPTY;
-    @Setting public Text suffix = Text.EMPTY;
+    @Setting public String text = "&4[&6The first person to type &4&l%phrase% &6wins 250 BacoBits!&4]";
     @Setting public List<String> words = Collections.emptyList();
     @Setting public int delay = 300;
     @Setting("max-delay") public int maxDelay = 0;
