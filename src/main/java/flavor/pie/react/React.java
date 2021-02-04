@@ -8,7 +8,6 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import org.bstats.sponge.MetricsLite2;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameState;
@@ -28,6 +27,7 @@ import org.spongepowered.api.event.filter.data.Has;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -35,7 +35,6 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.io.IOException;
@@ -61,8 +60,6 @@ public class React {
     ConfigurationLoader<CommentedConfigurationNode> loader;
     @Inject
     Logger logger;
-    @Inject @SuppressWarnings("unused")
-    MetricsLite2 metrics;
     Config config;
     boolean inGame;
     String current;
@@ -71,10 +68,8 @@ public class React {
     Instant started;
 
     @Listener
-    public void preInit(GamePreInitializationEvent e) throws IOException, ObjectMappingException {
+    public void preInit(GamePreInitializationEvent e) {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(BigDecimal.class), new BigDecimalSerializer());
-        random = new Random();
-        loadConfig();
         DataRegistration.builder()
                 .dataClass(ReactData.class)
                 .immutableClass(ReactData.Immutable.class)
@@ -82,6 +77,12 @@ public class React {
                 .manipulatorId("react_data")
                 .dataName("ReactData")
                 .buildAndRegister(container);
+    }
+
+    @Listener
+    public void GameStarted(GameStartedServerEvent e) throws IOException, ObjectMappingException {
+        random = new Random();
+        loadConfig();
     }
 
     @Listener
@@ -134,7 +135,8 @@ public class React {
             return;
         }
         inGame = true;
-        current = config.words.get(random.nextInt(config.words.size()));
+        WordGenerator generator = new WordGenerator();
+        current = generator.newWord(getRandomNumber(5,20));
         Text fullText = TextSerializers.FORMATTING_CODE.deserialize(config.text.replace("%phrase%", current));
         game.getServer().getBroadcastChannel().send(fullText);
         started = Instant.now();
@@ -148,6 +150,9 @@ public class React {
                 .submit(this);
     }
 
+    public int getRandomNumber(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
+    }
 
     private static final Pattern ASTERISK = Pattern.compile("^\\*");
     private static final Pattern WINNER = Pattern.compile("$winner", Pattern.LITERAL);

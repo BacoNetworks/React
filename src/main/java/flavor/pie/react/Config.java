@@ -17,7 +17,6 @@ public class Config {
     public final static TypeToken<Config> type = TypeToken.of(Config.class);
 
     @Setting public String text = "&4[&6The first person to type &4&l%phrase% &6wins 250 BacoBits!&4]";
-    @Setting public List<String> words = Collections.emptyList();
     @Setting public int delay = 300;
     @Setting("max-delay") public int maxDelay = 0;
     @Setting("min-players") public int minPlayers = 5;
