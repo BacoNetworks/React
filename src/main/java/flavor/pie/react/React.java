@@ -62,6 +62,7 @@ public class React {
     Logger logger;
     Config config;
     boolean inGame;
+    boolean MathGame = false;
     String current;
     Task task;
     Random random;
@@ -130,14 +131,47 @@ public class React {
     }
 
     private void newGame() {
-        if (!game.getState().equals(GameState.SERVER_STARTED) ||
-                config.minPlayers > game.getServer().getOnlinePlayers().size()) {
+        if (!game.getState().equals(GameState.SERVER_STARTED) || config.minPlayers > game.getServer().getOnlinePlayers().size()) {
             return;
         }
         inGame = true;
-        WordGenerator generator = new WordGenerator();
-        current = generator.newWord(getRandomNumber(5,20));
-        Text fullText = TextSerializers.FORMATTING_CODE.deserialize(config.text.replace("%phrase%", current));
+        Text fullText;
+        if (!MathGame) {
+            WordGenerator generator = new WordGenerator();
+            current = generator.newWord(getRandomNumber(5, 20));
+            fullText = TextSerializers.FORMATTING_CODE.deserialize(config.text.replace("%phrase%", current));
+            MathGame = true;
+        } else {
+            int num1 = getRandomNumber(100, 1000);
+            int num2 = getRandomNumber(1, 2000);
+            int funmath = getRandomNumber(0, 4);
+            int fun;
+            String math;
+            boolean switched = false;
+            if (funmath < 2) {
+                fun = num1 + num2;
+                math = "+";
+            } else if (funmath == 2) {
+                if (num2 > num1) {
+                    fun = num2 - num1;
+                    switched = true;
+                } else {
+                    fun = num1 - num2;
+                }
+                math = "-";
+            } else {
+                num2 = getRandomNumber(2, 10);
+                fun = num1 * num2;
+                math = "*";
+            }
+            current = String.valueOf(fun);
+            if (switched) {
+                fullText = TextSerializers.FORMATTING_CODE.deserialize(config.textMath.replace("%num1%", String.valueOf(num2)).replace("%num2%", String.valueOf(num1)).replace("%math%", math));
+            } else {
+                fullText = TextSerializers.FORMATTING_CODE.deserialize(config.textMath.replace("%num1%", String.valueOf(num1)).replace("%num2%", String.valueOf(num2)).replace("%math%", math));
+            }
+            MathGame = false;
+        }
         game.getServer().getBroadcastChannel().send(fullText);
         started = Instant.now();
         scheduleGame();

@@ -17,9 +17,10 @@ public class Config {
     public final static TypeToken<Config> type = TypeToken.of(Config.class);
 
     @Setting public String text = "&4[&6The first person to type &4&l%phrase% &6wins 250 BacoBits!&4]";
-    @Setting public int delay = 300;
+    @Setting public String textMath = "&4[&6The first person to type how much &4&l%num1% &6%math% &4&l%num2% &6is &6wins 250 BacoBits!&4]";
+    @Setting public int delay = 10;
     @Setting("max-delay") public int maxDelay = 0;
-    @Setting("min-players") public int minPlayers = 5;
+    @Setting("min-players") public int minPlayers = 0;
     @Setting public RewardsBlock rewards = new RewardsBlock();
 
     @ConfigSerializable
